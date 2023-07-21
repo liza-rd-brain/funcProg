@@ -1,4 +1,14 @@
-import { allPass, pipe, prop, propSatisfies, equals } from "ramda";
+import {
+  __,
+  allPass, //
+  pipe,
+  prop,
+  values,
+  equals,
+  filter,
+  gte,
+  length,
+} from "ramda";
 
 const CIRCLE_FGR = "circle";
 const SQUARE_FGR = "square";
@@ -26,7 +36,7 @@ const YELLOW_CLR = "yellow";
  */
 
 const isWhite = equals(WHITE_CLR);
-const isGrean = equals(GREEN_CLR);
+const isGreen = equals(GREEN_CLR);
 const isRed = equals(RED_CLR);
 const isYellow = equals(YELLOW_CLR);
 
@@ -36,10 +46,17 @@ const getTriangle = prop(TRIANGLE_FGR);
 const getStar = prop(STAR_FGR);
 
 const isCircleWhite = pipe(getCircle, isWhite);
-const isSquareGreen = pipe(getSquare, isGrean);
+const isSquareGreen = pipe(getSquare, isGreen);
 const isTriangleWhite = pipe(getTriangle, isWhite);
 const isStarRed = pipe(getStar, isRed);
 
+const getAmount = gte(__, 2);
+
+const filterByGreen = filter((item) => item === GREEN_CLR);
+
+const getGreenFigureList = pipe(filterByGreen, values, length);
+
+// 1. Красная звезда, зеленый квадрат, все остальные белые.
 export const validateFieldN1 = allPass([
   isCircleWhite,
   isSquareGreen,
@@ -47,17 +64,9 @@ export const validateFieldN1 = allPass([
   isStarRed,
 ]);
 
-// 1. Красная звезда, зеленый квадрат, все остальные белые.
-export const validateFieldN1Old = ({ star, square, triangle, circle }) => {
-  if (triangle !== "white" || circle !== "white") {
-    return false;
-  }
-
-  return star === "red" && square === "green";
-};
-
 // 2. Как минимум две фигуры зеленые.
-export const validateFieldN2 = () => false;
+export const validateFieldN2 = pipe(getGreenFigureList, getAmount);
+// export const validateFieldN2 = getGreenFigureList;
 
 // 3. Количество красных фигур равно кол-ву синих.
 export const validateFieldN3 = () => false;
