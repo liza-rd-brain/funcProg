@@ -14,6 +14,9 @@ import {
   countBy,
   sort,
   last,
+  and,
+  not,
+  complement,
 } from "ramda";
 
 const CIRCLE_FGR = "circle";
@@ -62,14 +65,21 @@ const getSquare = prop(SQUARE_FGR);
 const getTriangle = prop(TRIANGLE_FGR);
 const getStar = prop(STAR_FGR);
 
-const getFigure = (figure) => prop(figure);
+const getFigureItem = (figure) => {
+  console.log(figure, prop(figure)(TEST_OBJ));
+  return prop(figure);
+};
 
 const isCircleWhite = pipe(getCircle, isWhite);
-const isSquareGreen = pipe(getSquare, isGreen);
-const isTriangleWhite = pipe(getTriangle, isWhite);
-const isStarRed = pipe(getStar, isRed);
 const isCircleBlue = pipe(getCircle, isBlue);
+const isSquareGreen = pipe(getSquare, isGreen);
 const isSquareOrange = pipe(getSquare, isOrange);
+const isTriangleWhite = pipe(getTriangle, isWhite);
+const isTriangleGreen = pipe(getTriangle, isGreen);
+const isStarRed = pipe(getStar, isRed);
+const isStarWhite = pipe(getStar, isWhite);
+const isStarNotRed = complement(isStarRed);
+const isStarNotWhite = complement(isStarWhite);
 
 const isTwoAmount = gte(__, 2);
 const isAmount = (amount) => gte(__, amount);
@@ -80,6 +90,8 @@ const getColorAmount = (color) => {
   return pipe(filterByColor(color), values, length);
 };
 
+const getColorOf = (figure) => pipe(getFigureItem(figure), values, head);
+
 const isEqualAmount = (color1, color2) => {
   const colorAmount = getColorAmount(color1);
   //  identity(equals(getColorAmount(color1), getColorAmount(color2)));
@@ -88,14 +100,16 @@ const isEqualAmount = (color1, color2) => {
   return false;
 };
 
+const isFigureSameColor = ({ triangle: tColor, square: sColor }) =>
+  equals(tColor, sColor);
+const triangleNotWhite = complement(isTriangleWhite);
+
 const isAllSameColor = (color) => {
   return pipe(getColorAmount(color), isAmount(4));
 };
 
 const filterWithoutColor = (color) => without([color]);
 const sortBiggerFirst = sort((a, b) => b - a);
-
-console.log(filterWithoutColor(WHITE_CLR)(["white", "red"]));
 
 const getSameColorAmount = pipe(
   countBy(identity),
@@ -113,6 +127,9 @@ const isPartNotColor = (color, amount) => {
   );
 };
 
+const isTwoFigureGreen = pipe(getColorAmount(GREEN_CLR), isAmount(2));
+const someFigureRed = pipe(getColorAmount(RED_CLR), isAmount(1));
+
 // 1. Красная звезда, зеленый квадрат, все остальные белые.
 export const validateFieldN1 = allPass([
   isCircleWhite,
@@ -123,18 +140,15 @@ export const validateFieldN1 = allPass([
 
 // 2. Как минимум две фигуры зеленые.
 export const validateFieldN2 = pipe(getColorAmount(GREEN_CLR), isTwoAmount);
-console.log(validateFieldN2);
+/* console.log(validateFieldN2); */
 // export const validateFieldN2 = getGreenFigureList;
 
 // 3. Количество красных фигур равно кол-ву синих.
 //ОСТАВИЛА НА ПОТОМ!!
 export const validateFieldN3 = isEqualAmount(RED_CLR, BLUE_CLR);
 
-/* console.log(isEqualAmount(RED_CLR, BLUE_CLR)); */
-
 // 4. Синий круг, красная звезда, оранжевый квадрат треугольник любого цвета
-// export const validateFieldN4 =
-//   allPass[(isCircleBlue, isStarRed, isSquareOrange)];
+
 export const validateFieldN4 = allPass([
   isCircleBlue,
   isStarRed,
@@ -145,16 +159,20 @@ export const validateFieldN4 = allPass([
 export const validateFieldN5 = isPartNotColor(WHITE_CLR, 3);
 
 // 6. Ровно две зеленые фигуры (одна из зелёных – это треугольник), плюс одна красная. Четвёртая оставшаяся любого доступного цвета, но не нарушающая первые два условия
-export const validateFieldN6 = () => false;
+export const validateFieldN6 = allPass([
+  isTriangleGreen,
+  isTwoFigureGreen,
+  someFigureRed,
+]);
 
 // 7. Все фигуры оранжевые.
 export const validateFieldN7 = isAllSameColor(ORANGE_CLR);
 
 // 8. Не красная и не белая звезда, остальные – любого цвета.
-export const validateFieldN8 = () => false;
+export const validateFieldN8 = allPass([isStarNotWhite, isStarNotRed]);
 
 // 9. Все фигуры зеленые.
 export const validateFieldN9 = isAllSameColor(GREEN_CLR);
 
 // 10. Треугольник и квадрат одного цвета (не белого), остальные – любого цвета
-export const validateFieldN10 = () => false;
+export const validateFieldN10 = allPass([isFigureSameColor, triangleNotWhite]);
