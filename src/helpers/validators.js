@@ -13,10 +13,8 @@ import {
   without,
   countBy,
   sort,
-  last,
-  and,
-  not,
   complement,
+  tail,
 } from "ramda";
 
 const CIRCLE_FGR = "circle";
@@ -25,10 +23,10 @@ const TRIANGLE_FGR = "triangle";
 const STAR_FGR = "star";
 
 const RED_CLR = "red";
+const BLUE_CLR = "blue";
 const WHITE_CLR = "white";
 const GREEN_CLR = "green";
 const ORANGE_CLR = "orange";
-const BLUE_CLR = "blue";
 
 const TEST_OBJ = {
   CIRCLE_FGR: RED_CLR, //
@@ -66,7 +64,6 @@ const getTriangle = prop(TRIANGLE_FGR);
 const getStar = prop(STAR_FGR);
 
 const getFigureItem = (figure) => {
-  console.log(figure, prop(figure)(TEST_OBJ));
   return prop(figure);
 };
 
@@ -89,26 +86,24 @@ const filterByColor = (color) => filter((item) => item === color);
 const getColorAmount = (color) => {
   return pipe(filterByColor(color), values, length);
 };
+const filterWithoutColor = (color) => without(color);
 
-const getColorOf = (figure) => pipe(getFigureItem(figure), values, head);
+const getColorRedBlue = pipe(
+  values,
+  filterWithoutColor([WHITE_CLR, GREEN_CLR, ORANGE_CLR])
+);
 
-const isEqualAmount = (color1, color2) => {
-  const colorAmount = getColorAmount(color1);
-  //  identity(equals(getColorAmount(color1), getColorAmount(color2)));
-  /*   console.log(identity(equals(getColorAmount(color1), getColorAmount(color2)))); */
-  /*  return identity(res); */
-  return false;
-};
+const isColorAmountEqual = ([first, second]) => first === second;
+
+const isEqualAmount = () =>
+  pipe(getColorRedBlue, countBy(identity), values, isColorAmountEqual);
 
 const isFigureSameColor = ({ triangle: tColor, square: sColor }) =>
   equals(tColor, sColor);
 const triangleNotWhite = complement(isTriangleWhite);
 
-const isAllSameColor = (color) => {
-  return pipe(getColorAmount(color), isAmount(4));
-};
+const isAllSameColor = (color) => pipe(getColorAmount(color), isAmount(4));
 
-const filterWithoutColor = (color) => without([color]);
 const sortBiggerFirst = sort((a, b) => b - a);
 
 const getSameColorAmount = pipe(
@@ -121,7 +116,7 @@ const getSameColorAmount = pipe(
 const isPartNotColor = (color, amount) => {
   return pipe(
     values,
-    filterWithoutColor(color),
+    filterWithoutColor([color]),
     getSameColorAmount,
     isAmount(amount)
   );
@@ -140,15 +135,11 @@ export const validateFieldN1 = allPass([
 
 // 2. Как минимум две фигуры зеленые.
 export const validateFieldN2 = pipe(getColorAmount(GREEN_CLR), isTwoAmount);
-/* console.log(validateFieldN2); */
-// export const validateFieldN2 = getGreenFigureList;
 
 // 3. Количество красных фигур равно кол-ву синих.
-//ОСТАВИЛА НА ПОТОМ!!
 export const validateFieldN3 = isEqualAmount(RED_CLR, BLUE_CLR);
 
 // 4. Синий круг, красная звезда, оранжевый квадрат треугольник любого цвета
-
 export const validateFieldN4 = allPass([
   isCircleBlue,
   isStarRed,
