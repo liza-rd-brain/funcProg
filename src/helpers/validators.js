@@ -1,3 +1,4 @@
+import { head } from "lodash";
 import {
   __,
   allPass, //
@@ -8,6 +9,11 @@ import {
   filter,
   gte,
   length,
+  identity,
+  without,
+  countBy,
+  sort,
+  last,
 } from "ramda";
 
 const CIRCLE_FGR = "circle";
@@ -18,7 +24,15 @@ const STAR_FGR = "star";
 const RED_CLR = "red";
 const WHITE_CLR = "white";
 const GREEN_CLR = "green";
-const YELLOW_CLR = "yellow";
+const ORANGE_CLR = "orange";
+const BLUE_CLR = "blue";
+
+const TEST_OBJ = {
+  CIRCLE_FGR: RED_CLR, //
+  SQUARE_FGR: WHITE_CLR,
+  TRIANGLE_FGR: ORANGE_CLR,
+  STAR_FGR: BLUE_CLR,
+};
 
 /**
  * @file Домашка по FP ч. 1
@@ -38,23 +52,66 @@ const YELLOW_CLR = "yellow";
 const isWhite = equals(WHITE_CLR);
 const isGreen = equals(GREEN_CLR);
 const isRed = equals(RED_CLR);
-const isYellow = equals(YELLOW_CLR);
+const isOrange = equals(ORANGE_CLR);
+const isBlue = equals(BLUE_CLR);
+
+const isColor = (color) => equals(color);
 
 const getCircle = prop(CIRCLE_FGR);
 const getSquare = prop(SQUARE_FGR);
 const getTriangle = prop(TRIANGLE_FGR);
 const getStar = prop(STAR_FGR);
 
+const getFigure = (figure) => prop(figure);
+
 const isCircleWhite = pipe(getCircle, isWhite);
 const isSquareGreen = pipe(getSquare, isGreen);
 const isTriangleWhite = pipe(getTriangle, isWhite);
 const isStarRed = pipe(getStar, isRed);
+const isCircleBlue = pipe(getCircle, isBlue);
+const isSquareOrange = pipe(getSquare, isOrange);
 
-const getAmount = gte(__, 2);
+const isTwoAmount = gte(__, 2);
+const isAmount = (amount) => gte(__, amount);
 
-const filterByGreen = filter((item) => item === GREEN_CLR);
+const filterByColor = (color) => filter((item) => item === color);
 
-const getGreenFigureList = pipe(filterByGreen, values, length);
+const getColorAmount = (color) => {
+  return pipe(filterByColor(color), values, length);
+};
+
+const isEqualAmount = (color1, color2) => {
+  const colorAmount = getColorAmount(color1);
+  //  identity(equals(getColorAmount(color1), getColorAmount(color2)));
+  /*   console.log(identity(equals(getColorAmount(color1), getColorAmount(color2)))); */
+  /*  return identity(res); */
+  return false;
+};
+
+const isAllSameColor = (color) => {
+  return pipe(getColorAmount(color), isAmount(4));
+};
+
+const filterWithoutColor = (color) => without([color]);
+const sortBiggerFirst = sort((a, b) => b - a);
+
+console.log(filterWithoutColor(WHITE_CLR)(["white", "red"]));
+
+const getSameColorAmount = pipe(
+  countBy(identity),
+  values,
+  sortBiggerFirst,
+  head
+);
+
+const isPartNotColor = (color, amount) => {
+  return pipe(
+    values,
+    filterWithoutColor(color),
+    getSameColorAmount,
+    isAmount(amount)
+  );
+};
 
 // 1. Красная звезда, зеленый квадрат, все остальные белые.
 export const validateFieldN1 = allPass([
@@ -65,29 +122,39 @@ export const validateFieldN1 = allPass([
 ]);
 
 // 2. Как минимум две фигуры зеленые.
-export const validateFieldN2 = pipe(getGreenFigureList, getAmount);
+export const validateFieldN2 = pipe(getColorAmount(GREEN_CLR), isTwoAmount);
+console.log(validateFieldN2);
 // export const validateFieldN2 = getGreenFigureList;
 
 // 3. Количество красных фигур равно кол-ву синих.
-export const validateFieldN3 = () => false;
+//ОСТАВИЛА НА ПОТОМ!!
+export const validateFieldN3 = isEqualAmount(RED_CLR, BLUE_CLR);
+
+/* console.log(isEqualAmount(RED_CLR, BLUE_CLR)); */
 
 // 4. Синий круг, красная звезда, оранжевый квадрат треугольник любого цвета
-export const validateFieldN4 = () => false;
+// export const validateFieldN4 =
+//   allPass[(isCircleBlue, isStarRed, isSquareOrange)];
+export const validateFieldN4 = allPass([
+  isCircleBlue,
+  isStarRed,
+  isSquareOrange,
+]);
 
 // 5. Три фигуры одного любого цвета кроме белого (четыре фигуры одного цвета – это тоже true).
-export const validateFieldN5 = () => false;
+export const validateFieldN5 = isPartNotColor(WHITE_CLR, 3);
 
 // 6. Ровно две зеленые фигуры (одна из зелёных – это треугольник), плюс одна красная. Четвёртая оставшаяся любого доступного цвета, но не нарушающая первые два условия
 export const validateFieldN6 = () => false;
 
 // 7. Все фигуры оранжевые.
-export const validateFieldN7 = () => false;
+export const validateFieldN7 = isAllSameColor(ORANGE_CLR);
 
 // 8. Не красная и не белая звезда, остальные – любого цвета.
 export const validateFieldN8 = () => false;
 
 // 9. Все фигуры зеленые.
-export const validateFieldN9 = () => false;
+export const validateFieldN9 = isAllSameColor(GREEN_CLR);
 
 // 10. Треугольник и квадрат одного цвета (не белого), остальные – любого цвета
 export const validateFieldN10 = () => false;
