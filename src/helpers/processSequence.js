@@ -1,3 +1,19 @@
+import Api from "../tools/api";
+import {
+  tap, //
+  ifElse,
+  allPass,
+  __,
+  pipe,
+  lt,
+  gt,
+  partial,
+  length,
+  test,
+} from "ramda";
+
+const REGEXP_NUM_SYMBOL = /^[0-9]*[.,]?[0-9]+$/;
+
 /**
  * @file Домашка по FP ч. 2
  *
@@ -14,38 +30,42 @@
  * Иногда промисы от API будут приходить в состояние rejected, (прямо как и API в реальной жизни)
  * Ответ будет приходить в поле {result}
  */
- import Api from '../tools/api';
 
- const api = new Api();
+const api = new Api();
 
- /**
-  * Я – пример, удали меня
-  */
- const wait = time => new Promise(resolve => {
-     setTimeout(resolve, time);
- })
+/**
+ * Я – пример, удали меня
+ */
+const wait = (time) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, time);
+  });
 
- const processSequence = ({value, writeLog, handleSuccess, handleError}) => {
-     /**
-      * Я – пример, удали меня
-      */
-     writeLog(value);
+const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
+  console.log({ value, writeLog, handleSuccess, handleError });
+  const makeStep1 = tap(writeLog);
 
-     api.get('https://api.tech/numbers/base', {from: 2, to: 10, number: '01011010101'}).then(({result}) => {
-         writeLog(result);
-     });
+  const lessThen = (num) => lt(__, num);
+  const moreThen = (num) => gt(__, num);
+  const maxLengthString = (num) => pipe(length, lessThen(num));
+  const minLengthString = (num) => pipe(length, moreThen(num));
+  const isPositiveNumber = pipe(Math.sign, moreThen(0));
+  const isCorrectNumber = test(REGEXP_NUM_SYMBOL);
 
-     wait(2500).then(() => {
-         writeLog('SecondLog')
+  const isValidString = allPass([
+    maxLengthString(10),
+    minLengthString(2),
+    isPositiveNumber,
+    isCorrectNumber,
+  ]);
 
-         return wait(1500);
-     }).then(() => {
-         writeLog('ThirdLog');
+  const makeStep3 = () => console.log("nextStep");
 
-         return wait(400);
-     }).then(() => {
-         handleSuccess('Done');
-     });
- }
+  const validateWithErrMsg = partial(handleError, ["ValidationError"]);
+  const makeStep2 = ifElse(isValidString, makeStep3, validateWithErrMsg);
+
+  const runSequence = pipe(makeStep1, makeStep2);
+  runSequence(value);
+};
 
 export default processSequence;
