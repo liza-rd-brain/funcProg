@@ -48,7 +48,7 @@ const wait = (time) =>
 
 const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
   /* console.log({ value, writeLog, handleSuccess, handleError }); */
-  const makeWriteLog = tap(writeLog);
+  const printLog = tap(writeLog);
 
   const lessThen = (num) => lt(__, num);
   const moreThen = (num) => gt(__, num);
@@ -67,10 +67,10 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
   const squareNumber = (number) => Math.pow(number, 2);
   const calculateReminder = (number) => number % 3;
 
-  const makeNumberHandling = pipe(Number, Math.round, makeWriteLog);
-  const getSymbolAmount = pipe(andThen(length), andThen(makeWriteLog));
-  const makeSquareNumber = pipe(andThen(squareNumber), andThen(makeWriteLog));
-  const getReminder = pipe(andThen(calculateReminder), andThen(makeWriteLog));
+  const makeNumberHandling = pipe(Number, Math.round, printLog);
+  const getSymbolAmount = pipe(andThen(length), andThen(printLog));
+  const makeSquareNumber = pipe(andThen(squareNumber), andThen(printLog));
+  const getReminder = pipe(andThen(calculateReminder), andThen(printLog));
 
   const setParams = (entry) => {
     return { number: entry, from: 10, to: 2 };
@@ -81,7 +81,7 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
   const makeNumberBinary = pipe(
     makeRequestNumber,
     getSuccess,
-    andThen(makeWriteLog)
+    andThen(printLog)
   );
 
   const setParamsAnimal = (id) => `${URL_ANIMAL}/${id}`;
@@ -117,7 +117,11 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
     validateWithErrMsg
   );
 
-  const runSequence = pipe(makeWriteLog, makeValidation);
+  const runSequence = pipe(
+    printLog, //
+    makeValidation
+  );
+
   runSequence(value);
 };
 
