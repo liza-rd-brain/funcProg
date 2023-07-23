@@ -13,8 +13,7 @@ import {
   curry,
   andThen,
   prop,
-  pick,
-  identity,
+  otherwise,
 } from "ramda";
 
 const REGEXP_NUM_SYMBOL = /^[0-9]*[.,]?[0-9]+$/;
@@ -86,6 +85,7 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
   );
 
   const setParamsAnimal = (id) => `${URL_ANIMAL}/${id}`;
+
   const makeRequestAnimal = api.get(__, {});
   const getAnimal = pipe(
     tap(console.log), //
@@ -95,13 +95,18 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
     getSuccess
   );
 
+  const callSuccess = andThen(handleSuccess);
+  const cathErr = otherwise(handleError);
+
   const makeConditionalStep = pipe(
     makeNumberHandling,
     makeNumberBinary,
     getSymbolAmount,
     makeSquareNumber,
     getReminder,
-    getAnimal
+    getAnimal,
+    callSuccess,
+    cathErr
   );
 
   const validateWithErrMsg = partial(handleError, ["ValidationError"]);
