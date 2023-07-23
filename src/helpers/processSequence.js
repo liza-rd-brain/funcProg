@@ -64,20 +64,22 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
     isCorrectNumber,
   ]);
 
+  const makeNumberHandling = pipe(Number, Math.round, makeWriteLog);
+  const getSymbolAmount = pipe(andThen(length), andThen(makeWriteLog));
+
   const setParams = (entry) => {
     return { number: entry, from: 10, to: 2 };
   };
-
   const handleResult = pipe(prop("result"), String);
   const getSuccess = andThen(handleResult);
-
   const makeRequest = pipe(setParams, api.get(URL));
-
   const makeNumberBinary = pipe(makeRequest, getSuccess, andThen(makeWriteLog));
 
-  const makeNumberHandling = pipe(Number, Math.round, makeWriteLog);
-
-  const makeConditionalStep = pipe(makeNumberHandling, makeNumberBinary);
+  const makeConditionalStep = pipe(
+    makeNumberHandling,
+    makeNumberBinary,
+    getSymbolAmount
+  );
 
   const validateWithErrMsg = partial(handleError, ["ValidationError"]);
 
