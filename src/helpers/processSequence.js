@@ -10,10 +10,15 @@ import {
   partial,
   length,
   test,
+  curry,
+  andThen,
+  prop,
+  pick,
+  identity,
 } from "ramda";
 
 const REGEXP_NUM_SYMBOL = /^[0-9]*[.,]?[0-9]+$/;
-
+const URL = "https://api.tech/numbers/base";
 /**
  * @file Домашка по FP ч. 2
  *
@@ -42,7 +47,7 @@ const wait = (time) =>
   });
 
 const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
-  console.log({ value, writeLog, handleSuccess, handleError });
+  /* console.log({ value, writeLog, handleSuccess, handleError }); */
   const makeWriteLog = tap(writeLog);
 
   const lessThen = (num) => lt(__, num);
@@ -59,14 +64,26 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
     isCorrectNumber,
   ]);
 
+  const setParams = (entry) => {
+    return { number: entry, from: 10, to: 2 };
+  };
+
+  const handleResult = pipe(prop("result"), String);
+  const getSuccess = andThen(handleResult);
+
+  const makeRequest = pipe(setParams, api.get(URL));
+
+  const makeNumberBinary = pipe(makeRequest, getSuccess, andThen(makeWriteLog));
+
   const makeNumberHandling = pipe(Number, Math.round, makeWriteLog);
 
-  const makeNextStep = pipe(makeNumberHandling);
+  const makeConditionalStep = pipe(makeNumberHandling, makeNumberBinary);
 
   const validateWithErrMsg = partial(handleError, ["ValidationError"]);
+
   const makeValidation = ifElse(
     isValidString,
-    makeNextStep,
+    makeConditionalStep,
     validateWithErrMsg
   );
 
