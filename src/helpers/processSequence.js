@@ -65,10 +65,12 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
   ]);
 
   const squareNumber = (number) => Math.pow(number, 2);
+  const calculateReminder = (number) => number % 3;
 
   const makeNumberHandling = pipe(Number, Math.round, makeWriteLog);
   const getSymbolAmount = pipe(andThen(length), andThen(makeWriteLog));
   const makeSquareNumber = pipe(andThen(squareNumber), andThen(makeWriteLog));
+  const getReminder = pipe(andThen(calculateReminder), andThen(makeWriteLog));
 
   const setParams = (entry) => {
     return { number: entry, from: 10, to: 2 };
@@ -82,7 +84,8 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
     makeNumberHandling,
     makeNumberBinary,
     getSymbolAmount,
-    makeSquareNumber
+    makeSquareNumber,
+    getReminder
   );
 
   const validateWithErrMsg = partial(handleError, ["ValidationError"]);
