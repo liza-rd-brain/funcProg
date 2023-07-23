@@ -1,7 +1,7 @@
 import { head } from "lodash";
 import {
   __,
-  allPass, //
+  allPass,
   pipe,
   prop,
   values,
@@ -14,7 +14,6 @@ import {
   countBy,
   sort,
   complement,
-  tail,
 } from "ramda";
 
 const CIRCLE_FGR = "circle";
@@ -27,13 +26,6 @@ const BLUE_CLR = "blue";
 const WHITE_CLR = "white";
 const GREEN_CLR = "green";
 const ORANGE_CLR = "orange";
-
-const TEST_OBJ = {
-  CIRCLE_FGR: RED_CLR, //
-  SQUARE_FGR: WHITE_CLR,
-  TRIANGLE_FGR: ORANGE_CLR,
-  STAR_FGR: BLUE_CLR,
-};
 
 /**
  * @file Домашка по FP ч. 1
@@ -56,16 +48,10 @@ const isRed = equals(RED_CLR);
 const isOrange = equals(ORANGE_CLR);
 const isBlue = equals(BLUE_CLR);
 
-const isColor = (color) => equals(color);
-
 const getCircle = prop(CIRCLE_FGR);
 const getSquare = prop(SQUARE_FGR);
 const getTriangle = prop(TRIANGLE_FGR);
 const getStar = prop(STAR_FGR);
-
-const getFigureItem = (figure) => {
-  return prop(figure);
-};
 
 const isCircleWhite = pipe(getCircle, isWhite);
 const isCircleBlue = pipe(getCircle, isBlue);
