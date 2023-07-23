@@ -43,7 +43,7 @@ const wait = (time) =>
 
 const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
   console.log({ value, writeLog, handleSuccess, handleError });
-  const makeStep1 = tap(writeLog);
+  const makeWriteLog = tap(writeLog);
 
   const lessThen = (num) => lt(__, num);
   const moreThen = (num) => gt(__, num);
@@ -59,12 +59,18 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
     isCorrectNumber,
   ]);
 
-  const makeStep3 = () => console.log("nextStep");
+  const makeNumberHandling = pipe(Number, Math.round, makeWriteLog);
+
+  const makeNextStep = pipe(makeNumberHandling);
 
   const validateWithErrMsg = partial(handleError, ["ValidationError"]);
-  const makeStep2 = ifElse(isValidString, makeStep3, validateWithErrMsg);
+  const makeValidation = ifElse(
+    isValidString,
+    makeNextStep,
+    validateWithErrMsg
+  );
 
-  const runSequence = pipe(makeStep1, makeStep2);
+  const runSequence = pipe(makeWriteLog, makeValidation);
   runSequence(value);
 };
 
