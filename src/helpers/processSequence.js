@@ -64,8 +64,11 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
     isCorrectNumber,
   ]);
 
+  const squareNumber = (number) => Math.pow(number, 2);
+
   const makeNumberHandling = pipe(Number, Math.round, makeWriteLog);
   const getSymbolAmount = pipe(andThen(length), andThen(makeWriteLog));
+  const makeSquareNumber = pipe(andThen(squareNumber), andThen(makeWriteLog));
 
   const setParams = (entry) => {
     return { number: entry, from: 10, to: 2 };
@@ -78,7 +81,8 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
   const makeConditionalStep = pipe(
     makeNumberHandling,
     makeNumberBinary,
-    getSymbolAmount
+    getSymbolAmount,
+    makeSquareNumber
   );
 
   const validateWithErrMsg = partial(handleError, ["ValidationError"]);
