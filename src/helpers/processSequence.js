@@ -18,7 +18,8 @@ import {
 } from "ramda";
 
 const REGEXP_NUM_SYMBOL = /^[0-9]*[.,]?[0-9]+$/;
-const URL = "https://api.tech/numbers/base";
+const URL_NUMBER = "https://api.tech/numbers/base";
+const URL_ANIMAL = "https://animals.tech";
 /**
  * @file Домашка по FP ч. 2
  *
@@ -77,15 +78,30 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
   };
   const handleResult = pipe(prop("result"), String);
   const getSuccess = andThen(handleResult);
-  const makeRequest = pipe(setParams, api.get(URL));
-  const makeNumberBinary = pipe(makeRequest, getSuccess, andThen(makeWriteLog));
+  const makeRequestNumber = pipe(setParams, api.get(URL_NUMBER));
+  const makeNumberBinary = pipe(
+    makeRequestNumber,
+    getSuccess,
+    andThen(makeWriteLog)
+  );
+
+  const setParamsAnimal = (id) => `${URL_ANIMAL}/${id}`;
+  const makeRequestAnimal = api.get(__, {});
+  const getAnimal = pipe(
+    tap(console.log), //
+    andThen(setParamsAnimal),
+    tap(console.log),
+    andThen(makeRequestAnimal),
+    getSuccess
+  );
 
   const makeConditionalStep = pipe(
     makeNumberHandling,
     makeNumberBinary,
     getSymbolAmount,
     makeSquareNumber,
-    getReminder
+    getReminder,
+    getAnimal
   );
 
   const validateWithErrMsg = partial(handleError, ["ValidationError"]);
