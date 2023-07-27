@@ -8,6 +8,7 @@ import {
   equals,
   filter,
   gte,
+  lt,
   length,
   identity,
   without,
@@ -66,6 +67,7 @@ const isStarNotWhite = complement(isStarWhite);
 
 const isTwoAmount = gte(__, 2);
 const isAmount = (amount) => gte(__, amount);
+const isAmountExactly = (amount) => equals(__, amount);
 
 const filterByColor = (color) => filter((item) => item === color);
 
@@ -108,8 +110,8 @@ const isPartNotColor = (color, amount) => {
   );
 };
 
-const isTwoFigureGreen = pipe(getColorAmount(GREEN_CLR), isAmount(2));
-const someFigureRed = pipe(getColorAmount(RED_CLR), isAmount(1));
+const isTwoFigureGreen = pipe(getColorAmount(GREEN_CLR), isAmountExactly(2));
+const someFigureRed = pipe(getColorAmount(RED_CLR), isAmountExactly(1));
 
 // 1. Красная звезда, зеленый квадрат, все остальные белые.
 export const validateFieldN1 = allPass([
